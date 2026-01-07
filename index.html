@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Log - Mobile</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary: #dc3545;
+            --secondary: #007bff;
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #1c1e21;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; padding: 0 0 80px 0; background: var(--bg); color: var(--text);
+        }
+
+        /* Header & Sticky Controls */
+        .header {
+            background: var(--card); padding: 20px; position: sticky; top: 0; z-index: 100;
+            border-bottom: 1px solid #ddd; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        h1 { margin: 0 0 15px 0; font-size: 1.2rem; text-align: center; color: var(--primary); }
+
+        /* Search Box */
+        .search-container { margin-bottom: 15px; }
+        #search-box {
+            width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #ddd;
+            background: #f8f9fa; font-size: 0.9rem; outline: none;
+        }
+
+        /* Portal Toggle */
+        .portal-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #fff; padding: 12px 15px; border-radius: 12px; border: 1px solid #eee;
+        }
+
+        /* Table Style for Mobile */
+        .log-container { padding: 10px; }
+        .table-wrapper { 
+            background: var(--card); border-radius: 15px; overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th { background: var(--primary); color: #fff; padding: 12px 8px; text-align: left; }
+        td { padding: 12px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 65px;
+            background: #fff; display: flex; border-top: 1px solid #ddd;
+            padding-bottom: env(safe-area-inset-bottom); z-index: 1000;
+        }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; text-decoration: none; color: #888; font-size: 0.7rem;
+        }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
+
+        /* Status Badge */
+        .badge { padding: 4px 8px; border-radius: 5px; font-weight: bold; font-size: 0.7rem; }
+        .status-on { background: #28a745; color: white; }
+        .status-off { background: #6c757d; color: white; }
+        
+        /* Action Buttons */
+        .btn-del { 
+            background: #ffeeee; color: #dc3545; border: 1px solid #ffcccc;
+            padding: 6px; border-radius: 6px; font-size: 0.7rem; font-weight: bold;
+        }
+        
+        /* Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: #ccc; border-radius: 34px; transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .4s; }
+        input:checked + .slider { background: #28a745; }
+        input:checked + .slider:before { transform: translateX(21px); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>⚙️ Admin Console</h1>
+        <div class="search-container">
+            <input type="text" id="search-box" placeholder="Cari nama atau aktivitas..." onkeyup="loadLogsRealtime()">
+        </div>
+        <div class="portal-bar">
+            <span style="font-size: 0.9rem; font-weight: 600;">Status Portal: <span id="toggle-status" class="badge">...</span></span>
+            <label class="switch">
+                <input type="checkbox" id="kepo-toggle" onchange="updateKepoToggle()">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="log-container">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="40%">User</th>
+                        <th width="30%">Aktivitas</th>
+                        <th width="30%">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="log-list">
+                    <tr><td colspan="3" style="text-align:center">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="kepo.html" class="nav-item active">
+            <span class="nav-icon">📋</span>
+            <span>Log Akses</span>
+        </a>
+        <a href="data.html" class="nav-item">
+            <span class="nav-icon">👥</span>
+            <span>Database</span>
+        </a>
+    </nav>
+
+    <script>
+        // Copy config Firebase Anda di sini
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDpPEkKbEt6b_v2OWlBfGuaVQpBg2-RWR4",
+            authDomain: "cwu-gen-2.firebaseapp.com",
+            databaseURL: "https://cwu-gen-2-default-rtdb.firebaseio.com",
+            projectId: "cwu-gen-2",
+            storageBucket: "cwu-gen-2.appspot.com",
+            messagingSenderId: "40585612014",
+            appId: "1:40585612014:web:c88141fee3699aca68181ff"
+        };
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const database = firebase.database();
+
+        let rawLogs = [];
+
+        function updateKepoToggle() {
+            const status = document.getElementById('kepo-toggle').checked ? 'on' : 'off';
+            database.ref('kepo_toggle').set(status);
+        }
+
+        database.ref('kepo_toggle').on('value', snap => {
+            const status = snap.val();
+            document.getElementById('kepo-toggle').checked = (status === 'on');
+            const badge = document.getElementById('toggle-status');
+            badge.textContent = status === 'on' ? 'OPEN' : 'CLOSED';
+            badge.className = 'badge ' + (status === 'on' ? 'status-on' : 'status-off');
+        });
+
+        database.ref('developer_clicks').on('value', (snapshot) => {
+            rawLogs = [];
+            snapshot.forEach(child => { rawLogs.push({ key: child.key, ...child.val() }); });
+            rawLogs.reverse();
+            loadLogsRealtime();
+        });
+
+        function loadLogsRealtime() {
+            const logList = document.getElementById('log-list');
+            const searchTerm = document.getElementById('search-box').value.toLowerCase();
+            logList.innerHTML = '';
+            
+            let filteredLogs = rawLogs.filter(log => {
+                const searchString = `${log.nama} ${log.tipe_akses}`.toLowerCase();
+                return searchString.includes(searchTerm);
+            });
+
+            filteredLogs.forEach((log) => {
+                logList.innerHTML += `
+                    <tr>
+                        <td>
+                            <div style="font-weight:bold">${log.nama || 'Anonim'}</div>
+                            <div style="font-size:0.65rem; color:#888">${log.jam} - ${log.hari}</div>
+                        </td>
+                        <td><span style="color:var(--secondary)">${log.tipe_akses}</span></td>
+                        <td>
+                            <button class="btn-del" onclick="resetUserDevice('${log.key}', '${log.nama}')">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function resetUserDevice(key, nama) {
+            if (confirm(`Hapus log ${nama}?`)) await database.ref('developer_clicks/' + key).remove();
+        }
+    </script>
+</body>
+</html>
