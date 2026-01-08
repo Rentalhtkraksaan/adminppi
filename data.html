@@ -3,81 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Database User - Mobile</title>
+    <title>Database Manager - Pro Mobile</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         :root {
-            --bg: #000000;
-            --card: #121212;
-            --gold: #d4af37;
-            --text: #ffffff;
-            --red: #ff4d4d;
+            --primary: #dc3545;
+            --secondary: #007bff;
+            --bg: #f4f7f9;
+            --card: #ffffff;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --success: #00b894;
         }
 
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            margin: 0; padding: 20px 15px 100px 15px; 
-            background: var(--bg); color: var(--text);
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 0 0 100px 0; background: var(--bg); color: var(--text-main); }
 
-        .header { text-align: center; margin-bottom: 25px; }
-        .total-box { font-size: 3rem; color: var(--gold); font-weight: bold; margin: 0; }
-        .label { font-size: 0.7rem; letter-spacing: 2px; opacity: 0.6; }
+        /* Header & List */
+        .header { background: var(--card); padding: 25px 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; text-align: center; }
+        h1 { margin: 0; font-size: 1.1rem; color: var(--primary); text-transform: uppercase; font-weight: 800; }
+        .total-display { font-size: 2.8rem; font-weight: 800; margin: 5px 0; }
+        .label { font-size: 0.7rem; font-weight: 700; color: var(--text-sub); }
+        .user-list { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
 
-        .user-card {
-            background: var(--card); border: 1px solid #222;
-            padding: 15px; border-radius: 16px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        /* Card */
+        .user-card { background: var(--card); border-radius: 20px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05); animation: slideIn 0.4s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .user-info h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 700; }
+        .user-info p { margin: 3px 0 0 0; font-size: 0.8rem; color: var(--secondary); font-weight: 600; }
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding-top: 12px; border-top: 1px dashed #eee; }
 
-        .user-info h3 { margin: 0; font-size: 0.95rem; color: var(--gold); }
-        .user-info p { margin: 2px 0 0 0; font-size: 0.7rem; opacity: 0.5; }
+        /* Buttons */
+        .btn { border: none; padding: 10px 5px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; text-align: center; cursor: pointer; }
+        .btn-edit { background: #e8f0fe; color: var(--secondary); }
+        .btn-block { background: #fff4e5; color: #f39c12; }
+        .btn-del { background: #fff0f0; color: var(--primary); }
+        .status-badge { font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 800; }
+        .is-blocked { background: #ffebee; color: #c62828; }
+        .is-safe { background: #e8f5e9; color: #2e7d32; }
 
-        .activity-count {
-            background: rgba(212, 175, 55, 0.1); color: var(--gold);
-            padding: 4px 10px; border-radius: 10px; font-size: 0.65rem; font-weight: bold;
-            border: 1px solid rgba(212, 175, 55, 0.3); margin-bottom: 8px; display: inline-block;
+        /* --- MODAL FORM --- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
+            display: none; align-items: center; justify-content: center; z-index: 3000; padding: 20px;
         }
+        .modal-content {
+            background: white; width: 100%; max-width: 400px; border-radius: 25px; padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-content h2 { margin-top: 0; font-size: 1.2rem; color: var(--text-main); text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-sub); margin-bottom: 5px; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 0.9rem; outline: none;
+        }
+        .form-group input:focus { border-color: var(--secondary); }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-actions button { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; }
+        .btn-cancel { background: #eee; color: #666; }
+        .btn-save { background: var(--secondary); color: white; }
 
-        .btn-delete {
-            background: rgba(255, 77, 77, 0.1); color: var(--red);
-            border: 1px solid var(--red); padding: 8px 12px;
-            border-radius: 8px; font-size: 0.7rem; font-weight: bold;
-        }
-
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 65px;
-            background: #121212; display: flex; border-top: 1px solid #333;
-            padding-bottom: env(safe-area-inset-bottom); z-index: 1000;
-        }
-        .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; text-decoration: none; color: #555; font-size: 0.7rem;
-        }
-        .nav-item.active { color: var(--gold); font-weight: bold; }
-        .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
+        /* Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); display: flex; border-top: 1px solid #eee; z-index: 2000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: #b2bec3; }
+        .nav-item.active { color: var(--primary); pointer-events: none; }
+        .nav-text { font-size: 0.7rem; font-weight: 700; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <p class="label">TOTAL USER UNIK</p>
-        <h1 id="total-count" class="total-box">0</h1>
+        <h1>👥 User Management</h1>
+        <div class="total-display" id="total-count">0</div>
+        <div class="label">DATABASE USER TERDAFTAR</div>
     </div>
 
-    <div id="user-list">
+    <div class="user-list" id="user-list"></div>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <h2>Edit Data User</h2>
+            <input type="hidden" id="old-name">
+            <div class="form-group">
+                <label>NAMA LENGKAP</label>
+                <input type="text" id="edit-nama" placeholder="Masukkan nama...">
+            </div>
+            <div class="form-group">
+                <label>ANGKATAN</label>
+                <input type="number" id="edit-angkatan" placeholder="Contoh: 2023">
+            </div>
+            <div class="form-group">
+                <label>STATUS</label>
+                <select id="edit-status">
+                    <option value="Pengurus">Pengurus</option>
+                    <option value="PPI">PPI</option>
+                    <option value="Anggota">Anggota</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Batal</button>
+                <button class="btn-save" onclick="saveEdit()">Simpan Perubahan</button>
+            </div>
         </div>
+    </div>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item">
-            <span class="nav-icon">📋</span>
-            <span>Log Akses</span>
+            <span>📋</span><span class="nav-text">AKTIVITAS</span>
         </a>
-        <a href="data.html" class="nav-item active">
-            <span class="nav-icon">👥</span>
-            <span>Database</span>
+        <a href="javascript:void(0)" class="nav-item active">
+            <span>👥</span><span class="nav-text">DATABASE</span>
         </a>
     </nav>
 
@@ -87,54 +125,121 @@
             databaseURL: "https://cwu-gen-2-default-rtdb.firebaseio.com",
         };
         firebase.initializeApp(FIREBASE_CONFIG);
-        const db = firebase.database().ref('developer_clicks');
+        const db = firebase.database();
+        const logsRef = db.ref('developer_clicks');
+        const blockRef = db.ref('blacklist');
 
-        db.on('value', (snapshot) => {
-            const listContainer = document.getElementById('user-list');
-            const countDisplay = document.getElementById('total-count');
-            listContainer.innerHTML = '';
+        let blacklist = {};
+        let rawData = {};
 
-            if (snapshot.exists()) {
-                const rawData = snapshot.val();
-                const processedUsers = {};
+        blockRef.on('value', s => { blacklist = s.val() || {}; renderData(); });
+        logsRef.on('value', (snap) => { rawData = snap.val() || {}; renderData(); });
 
-                Object.keys(rawData).forEach(key => {
-                    const item = rawData[key];
-                    if (!item.nama) return;
-                    const nameKey = item.nama.toLowerCase().trim();
-                    if (!processedUsers[nameKey]) {
-                        processedUsers[nameKey] = { nama: item.nama, count: 1 };
-                    } else { processedUsers[nameKey].count += 1; }
+        function renderData() {
+            const container = document.getElementById('user-list');
+            container.innerHTML = '';
+            const userMap = new Map();
+
+            Object.keys(rawData).forEach(key => {
+                const d = rawData[key];
+                if (!d.nama) return;
+                const nameKey = d.nama.toLowerCase().trim();
+                userMap.set(nameKey, { 
+                    nama: d.nama, 
+                    info: d.info_tambahan || "",
+                    perangkat: d.user_id || d.perangkat || "unknown",
+                    count: (userMap.get(nameKey)?.count || 0) + 1 
                 });
+            });
 
-                const uniqueList = Object.values(processedUsers);
-                countDisplay.innerText = uniqueList.length;
+            const uniqueList = Array.from(userMap.values()).reverse();
+            document.getElementById('total-count').innerText = uniqueList.length;
 
-                uniqueList.forEach(user => {
-                    listContainer.innerHTML += `
-                        <div class="user-card">
+            uniqueList.forEach(u => {
+                const isBlocked = Object.values(blacklist).includes(u.perangkat);
+                const safeName = u.nama.replace(/'/g, "\\'");
+                const safeInfo = u.info.replace(/'/g, "\\'");
+
+                container.innerHTML += `
+                    <div class="user-card">
+                        <div class="card-header">
                             <div class="user-info">
-                                <h3>${user.nama}</h3>
-                                <p>Terdeteksi Aktif</p>
-                            </div>
-                            <div style="text-align: right;">
-                                <div class="activity-count">${user.count} Aktivitas</div><br>
-                                <button class="btn-delete" onclick="hapusUser('${user.nama}')">HAPUS</button>
+                                <h3>${u.nama}</h3>
+                                <p>${u.info || 'Belum diatur'}</p>
+                                <div style="margin-top:5px">
+                                    <span class="status-badge ${isBlocked ? 'is-blocked' : 'is-safe'}">
+                                        ${isBlocked ? '🚫 TERBLOKIR' : '✅ AKTIF'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    `;
+                        <div class="card-actions">
+                            <button class="btn btn-edit" onclick="openEditModal('${safeName}', '${safeInfo}')">⚙️ EDIT</button>
+                            <button class="btn btn-block" onclick="toggleBlock('${u.perangkat}', ${isBlocked})">
+                                ${isBlocked ? '🔓 BUKA' : '🚫 BLOCK'}
+                            </button>
+                            <button class="btn btn-del" onclick="hapusUser('${safeName}')">🗑️ HAPUS</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- FUNGSI MODAL ---
+        function openEditModal(nama, info) {
+            document.getElementById('old-name').value = nama;
+            document.getElementById('edit-nama').value = nama;
+            
+            // Coba pisahkan info (Misal: "2022 - Pengurus")
+            const parts = info.split(' - ');
+            document.getElementById('edit-angkatan').value = parts[0] || "";
+            document.getElementById('edit-status').value = parts[1] || "Anggota";
+            
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function saveEdit() {
+            const oldName = document.getElementById('old-name').value;
+            const newName = document.getElementById('edit-nama').value;
+            const angkatan = document.getElementById('edit-angkatan').value;
+            const status = document.getElementById('edit-status').value;
+            const newInfo = `${angkatan} - ${status}`;
+
+            if (!newName || !angkatan) return alert("Mohon lengkapi data!");
+
+            logsRef.orderByChild('nama').equalTo(oldName).once('value', s => {
+                const updates = {};
+                s.forEach(child => {
+                    updates[`${child.key}/nama`] = newName;
+                    updates[`${child.key}/info_tambahan`] = newInfo;
                 });
+                logsRef.update(updates).then(() => {
+                    alert("Data Berhasil Disimpan");
+                    closeModal();
+                });
+            });
+        }
+
+        function toggleBlock(perangkat, isBlocked) {
+            if (!perangkat || perangkat === "unknown") return alert("ID Tidak Valid");
+            const safeKey = btoa(perangkat).replace(/[=/+]/g, '');
+            if (isBlocked) {
+                if(confirm("Buka blokir?")) blockRef.child(safeKey).remove();
+            } else {
+                if(confirm("Blokir user ini?")) blockRef.child(safeKey).set(perangkat);
             }
-        });
+        }
 
         function hapusUser(nama) {
-            if (confirm(`Hapus permanen data ${nama}?`)) {
-                db.orderByChild('nama').equalTo(nama).once('value', snapshot => {
-                    if (snapshot.exists()) {
-                        const updates = {};
-                        snapshot.forEach(child => { updates[child.key] = null; });
-                        db.update(updates);
-                    }
+            if (confirm(`Hapus data "${nama}"?`)) {
+                logsRef.orderByChild('nama').equalTo(nama).once('value', s => {
+                    const updates = {};
+                    s.forEach(c => { updates[c.key] = null; });
+                    logsRef.update(updates);
                 });
             }
         }
