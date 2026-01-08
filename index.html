@@ -3,96 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Log - Mobile</title>
+    <title>Admin Log - Pro Mobile</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         :root {
             --primary: #dc3545;
             --secondary: #007bff;
-            --bg: #f0f2f5;
+            --bg: #f4f7f9;
             --card: #ffffff;
-            --text: #1c1e21;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --success: #00b894;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; padding: 0 0 80px 0; background: var(--bg); color: var(--text);
+            margin: 0; padding: 0 0 90px 0; background: var(--bg); color: var(--text-main);
         }
 
-        /* Header & Sticky Controls */
         .header {
-            background: var(--card); padding: 20px; position: sticky; top: 0; z-index: 100;
-            border-bottom: 1px solid #ddd; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            background: var(--card); padding: 15px 20px; position: sticky; top: 0; z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
         }
-        h1 { margin: 0 0 15px 0; font-size: 1.2rem; text-align: center; color: var(--primary); }
+        
+        h1 { margin: 0 0 15px 0; font-size: 1.3rem; font-weight: 800; color: var(--primary); text-align: center; }
 
-        /* Search Box */
-        .search-container { margin-bottom: 15px; }
-        #search-box {
-            width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #ddd;
-            background: #f8f9fa; font-size: 0.9rem; outline: none;
+        .search-bar {
+            width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #e0e0e0;
+            background: #f9f9f9; font-size: 0.95rem; outline: none; transition: 0.3s;
         }
+        .search-bar:focus { border-color: var(--secondary); background: #fff; }
 
-        /* Portal Toggle */
-        .portal-bar {
+        .portal-control {
             display: flex; justify-content: space-between; align-items: center;
-            background: #fff; padding: 12px 15px; border-radius: 12px; border: 1px solid #eee;
+            margin-top: 15px; padding: 10px 5px;
         }
 
-        /* Table Style for Mobile */
-        .log-container { padding: 10px; }
-        .table-wrapper { 
-            background: var(--card); border-radius: 15px; overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { background: var(--primary); color: #fff; padding: 12px 8px; text-align: left; }
-        td { padding: 12px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+        .log-list { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
 
-        /* Bottom Nav */
+        .log-card {
+            background: var(--card); border-radius: 18px; padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            display: flex; flex-direction: column; gap: 10px;
+            border-left: 6px solid var(--secondary);
+            position: relative; animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        
+        .user-name { font-weight: 700; font-size: 1.05rem; color: #2d3436; margin: 0; }
+        .user-meta { font-size: 0.75rem; color: var(--text-sub); margin-top: 2px; }
+
+        .activity-badge {
+            background: #e1f0ff; color: var(--secondary);
+            padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;
+        }
+
+        .card-bottom {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 10px; border-top: 1px dashed #eee; margin-top: 5px;
+        }
+
+        .block-status { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600; }
+        .status-text { text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .btn-del {
+            background: #fff0f0; color: var(--primary); border: 1px solid #ffcccc;
+            padding: 8px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: 700;
+            cursor: pointer;
+        }
+
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: #ddd; border-radius: 24px; transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .4s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        input:checked + .slider { background: var(--success); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
         .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 65px;
-            background: #fff; display: flex; border-top: 1px solid #ddd;
-            padding-bottom: env(safe-area-inset-bottom); z-index: 1000;
+            position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+            display: flex; border-top: 1px solid #eee; z-index: 2000;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         .nav-item {
             flex: 1; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; text-decoration: none; color: #888; font-size: 0.7rem;
+            justify-content: center; text-decoration: none; color: #b2bec3; transition: 0.3s;
         }
-        .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
-
-        /* Status Badge */
-        .badge { padding: 4px 8px; border-radius: 5px; font-weight: bold; font-size: 0.7rem; }
-        .status-on { background: #28a745; color: white; }
-        .status-off { background: #6c757d; color: white; }
-        
-        /* Action Buttons */
-        .btn-del { 
-            background: #ffeeee; color: #dc3545; border: 1px solid #ffcccc;
-            padding: 6px; border-radius: 6px; font-size: 0.7rem; font-weight: bold;
-        }
-        
-        /* Toggle Switch */
-        .switch { position: relative; display: inline-block; width: 45px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; inset: 0; background: #ccc; border-radius: 34px; transition: .4s; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .4s; }
-        input:checked + .slider { background: #28a745; }
-        input:checked + .slider:before { transform: translateX(21px); }
+        .nav-item.active { color: var(--primary); pointer-events: none; /* Mencegah klik ulang jika aktif */ }
+        .nav-icon { font-size: 1.3rem; margin-bottom: 2px; }
+        .nav-text { font-size: 0.7rem; font-weight: 700; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>⚙️ Admin Console</h1>
-        <div class="search-container">
-            <input type="text" id="search-box" placeholder="Cari nama atau aktivitas..." onkeyup="loadLogsRealtime()">
-        </div>
-        <div class="portal-bar">
-            <span style="font-size: 0.9rem; font-weight: 600;">Status Portal: <span id="toggle-status" class="badge">...</span></span>
+        <h1>⚙️ Control Panel</h1>
+        <input type="text" id="search-box" class="search-bar" placeholder="Cari nama user..." onkeyup="loadLogsRealtime()">
+        
+        <div class="portal-control">
+            <div style="display:flex; flex-direction:column;">
+                <span style="font-size:0.75rem; font-weight:700; color:var(--text-sub);">STATUS PORTAL</span>
+                <span id="portal-status-text" style="font-size:0.9rem; font-weight:800; color:var(--primary);">CLOSED</span>
+            </div>
             <label class="switch">
                 <input type="checkbox" id="kepo-toggle" onchange="updateKepoToggle()">
                 <span class="slider"></span>
@@ -100,49 +117,29 @@
         </div>
     </div>
 
-    <div class="log-container">
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th width="40%">User</th>
-                        <th width="30%">Aktivitas</th>
-                        <th width="30%">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="log-list">
-                    <tr><td colspan="3" style="text-align:center">Memuat data...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <div class="log-list" id="log-list"></div>
 
     <nav class="bottom-nav">
-        <a href="kepo.html" class="nav-item active">
+        <a href="javascript:window.scrollTo({top:0, behavior:'smooth'})" class="nav-item active">
             <span class="nav-icon">📋</span>
-            <span>Log Akses</span>
+            <span class="nav-text">AKTIVITAS</span>
         </a>
         <a href="data.html" class="nav-item">
             <span class="nav-icon">👥</span>
-            <span>Database</span>
+            <span class="nav-text">DATABASE</span>
         </a>
     </nav>
 
     <script>
-        // Copy config Firebase Anda di sini
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyDpPEkKbEt6b_v2OWlBfGuaVQpBg2-RWR4",
-            authDomain: "cwu-gen-2.firebaseapp.com",
             databaseURL: "https://cwu-gen-2-default-rtdb.firebaseio.com",
-            projectId: "cwu-gen-2",
-            storageBucket: "cwu-gen-2.appspot.com",
-            messagingSenderId: "40585612014",
-            appId: "1:40585612014:web:c88141fee3699aca68181ff"
         };
         firebase.initializeApp(FIREBASE_CONFIG);
         const database = firebase.database();
 
         let rawLogs = [];
+        let blacklistData = {};
 
         function updateKepoToggle() {
             const status = document.getElementById('kepo-toggle').checked ? 'on' : 'off';
@@ -151,47 +148,86 @@
 
         database.ref('kepo_toggle').on('value', snap => {
             const status = snap.val();
-            document.getElementById('kepo-toggle').checked = (status === 'on');
-            const badge = document.getElementById('toggle-status');
-            badge.textContent = status === 'on' ? 'OPEN' : 'CLOSED';
-            badge.className = 'badge ' + (status === 'on' ? 'status-on' : 'status-off');
+            const isOpen = status === 'on';
+            document.getElementById('kepo-toggle').checked = isOpen;
+            const textEl = document.getElementById('portal-status-text');
+            textEl.innerText = isOpen ? 'OPEN' : 'CLOSED';
+            textEl.style.color = isOpen ? 'var(--success)' : 'var(--primary)';
         });
 
-        database.ref('developer_clicks').on('value', (snapshot) => {
+        database.ref('blacklist').on('value', snap => {
+            blacklistData = snap.val() || {};
+            loadLogsRealtime();
+        });
+
+        database.ref('developer_clicks').on('value', snap => {
             rawLogs = [];
-            snapshot.forEach(child => { rawLogs.push({ key: child.key, ...child.val() }); });
+            snap.forEach(child => { rawLogs.push({ key: child.key, ...child.val() }); });
             rawLogs.reverse();
             loadLogsRealtime();
         });
 
         function loadLogsRealtime() {
-            const logList = document.getElementById('log-list');
-            const searchTerm = document.getElementById('search-box').value.toLowerCase();
-            logList.innerHTML = '';
+            const container = document.getElementById('log-list');
+            const search = document.getElementById('search-box').value.toLowerCase();
+            container.innerHTML = '';
             
-            let filteredLogs = rawLogs.filter(log => {
-                const searchString = `${log.nama} ${log.tipe_akses}`.toLowerCase();
-                return searchString.includes(searchTerm);
-            });
+            const filtered = rawLogs.filter(l => (l.nama||'').toLowerCase().includes(search));
 
-            filteredLogs.forEach((log) => {
-                logList.innerHTML += `
-                    <tr>
-                        <td>
-                            <div style="font-weight:bold">${log.nama || 'Anonim'}</div>
-                            <div style="font-size:0.65rem; color:#888">${log.jam} - ${log.hari}</div>
-                        </td>
-                        <td><span style="color:var(--secondary)">${log.tipe_akses}</span></td>
-                        <td>
-                            <button class="btn-del" onclick="resetUserDevice('${log.key}', '${log.nama}')">Hapus</button>
-                        </td>
-                    </tr>
+            if(filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.3;">Data tidak ditemukan</div>';
+                return;
+            }
+
+            filtered.forEach(log => {
+                const userID = log.user_id || log.perangkat;
+                const isBlocked = Object.values(blacklistData).includes(userID);
+                
+                container.innerHTML += `
+                    <div class="log-card" style="border-left-color: ${isBlocked ? 'var(--primary)' : 'var(--secondary)'}">
+                        <div class="card-top">
+                            <div>
+                                <h3 class="user-name">${log.nama || 'Anonim'}</h3>
+                                <div class="user-meta">${log.hari || ''}, ${log.jam || ''} • ${log.tanggal || ''}</div>
+                            </div>
+                            <span class="activity-badge">${log.tipe_akses || 'Akses'}</span>
+                        </div>
+                        
+                        <div class="card-bottom">
+                            <div class="block-status">
+                                <label class="switch">
+                                    <input type="checkbox" ${isBlocked ? 'checked' : ''} onchange="toggleBlock(this, '${userID}')">
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="status-text" style="color:${isBlocked ? 'var(--primary)' : 'var(--success)'}">
+                                    ${isBlocked ? 'Terblokir' : 'Aman'}
+                                </span>
+                            </div>
+                            <button class="btn-del" onclick="hapusLog('${log.key}')">Hapus</button>
+                        </div>
+                    </div>
                 `;
             });
         }
 
-        async function resetUserDevice(key, nama) {
-            if (confirm(`Hapus log ${nama}?`)) await database.ref('developer_clicks/' + key).remove();
+        function toggleBlock(cb, id) {
+            if(!id || id === 'undefined') return alert("ID tidak valid");
+            // Gunakan key yang sama dengan data.html agar sinkron
+            const key = btoa(id).replace(/[=/+]/g, '');
+            
+            if(cb.checked) {
+                if(confirm("Blokir user ini?")) {
+                    database.ref('blacklist/' + key).set(id);
+                } else {
+                    cb.checked = false;
+                }
+            } else {
+                database.ref('blacklist/' + key).remove();
+            }
+        }
+
+        function hapusLog(key) {
+            if(confirm('Hapus log aktivitas ini?')) database.ref('developer_clicks/'+key).remove();
         }
     </script>
 </body>
