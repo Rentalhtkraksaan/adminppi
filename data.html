@@ -20,53 +20,51 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 0 0 100px 0; background: var(--bg); color: var(--text-main); }
 
-        /* Header & List */
         .header { background: var(--card); padding: 25px 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; text-align: center; }
         h1 { margin: 0; font-size: 1.1rem; color: var(--primary); text-transform: uppercase; font-weight: 800; }
         .total-display { font-size: 2.8rem; font-weight: 800; margin: 5px 0; }
         .label { font-size: 0.7rem; font-weight: 700; color: var(--text-sub); }
         .user-list { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
 
-        /* Card */
-        .user-card { background: var(--card); border-radius: 20px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05); animation: slideIn 0.4s ease; }
+        /* Card Modern */
+        .user-card { background: var(--card); border-radius: 20px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05); animation: slideIn 0.4s ease; position: relative; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+        
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .user-info h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 700; }
+        .user-info h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 700; max-width: 80%; }
         .user-info p { margin: 3px 0 0 0; font-size: 0.8rem; color: var(--secondary); font-weight: 600; }
-        .card-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding-top: 12px; border-top: 1px dashed #eee; }
+        
+        /* Badge Aktivitas Per Orang */
+        .count-badge {
+            background: #f1f2f6; color: var(--text-sub);
+            padding: 5px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 800;
+            border: 1px solid #eee;
+        }
 
-        /* Buttons */
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding-top: 12px; border-top: 1px dashed #eee; margin-top: 10px; }
+
         .btn { border: none; padding: 10px 5px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; text-align: center; cursor: pointer; }
         .btn-edit { background: #e8f0fe; color: var(--secondary); }
         .btn-block { background: #fff4e5; color: #f39c12; }
         .btn-del { background: #fff0f0; color: var(--primary); }
+        
         .status-badge { font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: 800; }
         .is-blocked { background: #ffebee; color: #c62828; }
         .is-safe { background: #e8f5e9; color: #2e7d32; }
 
-        /* --- MODAL FORM --- */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
-            display: none; align-items: center; justify-content: center; z-index: 3000; padding: 20px;
-        }
-        .modal-content {
-            background: white; width: 100%; max-width: 400px; border-radius: 25px; padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: zoomIn 0.3s ease;
-        }
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 400px; border-radius: 25px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: zoomIn 0.3s ease; }
         @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .modal-content h2 { margin-top: 0; font-size: 1.2rem; color: var(--text-main); text-align: center; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-sub); margin-bottom: 5px; }
-        .form-group input, .form-group select {
-            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 0.9rem; outline: none;
-        }
-        .form-group input:focus { border-color: var(--secondary); }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 0.9rem; outline: none; }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
         .modal-actions button { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; }
         .btn-cancel { background: #eee; color: #666; }
         .btn-save { background: var(--secondary); color: white; }
 
-        /* Nav */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); display: flex; border-top: 1px solid #eee; z-index: 2000; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: #b2bec3; }
         .nav-item.active { color: var(--primary); pointer-events: none; }
@@ -89,11 +87,11 @@
             <input type="hidden" id="old-name">
             <div class="form-group">
                 <label>NAMA LENGKAP</label>
-                <input type="text" id="edit-nama" placeholder="Masukkan nama...">
+                <input type="text" id="edit-nama">
             </div>
             <div class="form-group">
                 <label>ANGKATAN</label>
-                <input type="number" id="edit-angkatan" placeholder="Contoh: 2023">
+                <input type="number" id="edit-angkatan">
             </div>
             <div class="form-group">
                 <label>STATUS</label>
@@ -105,18 +103,14 @@
             </div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeModal()">Batal</button>
-                <button class="btn-save" onclick="saveEdit()">Simpan Perubahan</button>
+                <button class="btn-save" onclick="saveEdit()">Simpan</button>
             </div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span>📋</span><span class="nav-text">AKTIVITAS</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-item active">
-            <span>👥</span><span class="nav-text">DATABASE</span>
-        </a>
+        <a href="index.html" class="nav-item"><span>📋</span><span class="nav-text">AKTIVITAS</span></a>
+        <a href="javascript:void(0)" class="nav-item active"><span>👥</span><span class="nav-text">DATABASE</span></a>
     </nav>
 
     <script>
@@ -144,12 +138,18 @@
                 const d = rawData[key];
                 if (!d.nama) return;
                 const nameKey = d.nama.toLowerCase().trim();
-                userMap.set(nameKey, { 
-                    nama: d.nama, 
-                    info: d.info_tambahan || "",
-                    perangkat: d.user_id || d.perangkat || "unknown",
-                    count: (userMap.get(nameKey)?.count || 0) + 1 
-                });
+                
+                if (userMap.has(nameKey)) {
+                    const existing = userMap.get(nameKey);
+                    userMap.set(nameKey, { ...existing, count: existing.count + 1 });
+                } else {
+                    userMap.set(nameKey, { 
+                        nama: d.nama, 
+                        info: d.info_tambahan || "",
+                        perangkat: d.user_id || d.perangkat || "unknown",
+                        count: 1 
+                    });
+                }
             });
 
             const uniqueList = Array.from(userMap.values()).reverse();
@@ -166,12 +166,13 @@
                             <div class="user-info">
                                 <h3>${u.nama}</h3>
                                 <p>${u.info || 'Belum diatur'}</p>
-                                <div style="margin-top:5px">
+                                <div style="margin-top:8px">
                                     <span class="status-badge ${isBlocked ? 'is-blocked' : 'is-safe'}">
                                         ${isBlocked ? '🚫 TERBLOKIR' : '✅ AKTIF'}
                                     </span>
                                 </div>
                             </div>
+                            <div class="count-badge">${u.count} AKTIVITAS</div>
                         </div>
                         <div class="card-actions">
                             <button class="btn btn-edit" onclick="openEditModal('${safeName}', '${safeInfo}')">⚙️ EDIT</button>
@@ -185,53 +186,35 @@
             });
         }
 
-        // --- FUNGSI MODAL ---
         function openEditModal(nama, info) {
             document.getElementById('old-name').value = nama;
             document.getElementById('edit-nama').value = nama;
-            
-            // Coba pisahkan info (Misal: "2022 - Pengurus")
             const parts = info.split(' - ');
             document.getElementById('edit-angkatan').value = parts[0] || "";
             document.getElementById('edit-status').value = parts[1] || "Anggota";
-            
             document.getElementById('editModal').style.display = 'flex';
         }
 
-        function closeModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
+        function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
         function saveEdit() {
             const oldName = document.getElementById('old-name').value;
             const newName = document.getElementById('edit-nama').value;
-            const angkatan = document.getElementById('edit-angkatan').value;
-            const status = document.getElementById('edit-status').value;
-            const newInfo = `${angkatan} - ${status}`;
-
-            if (!newName || !angkatan) return alert("Mohon lengkapi data!");
-
+            const info = `${document.getElementById('edit-angkatan').value} - ${document.getElementById('edit-status').value}`;
             logsRef.orderByChild('nama').equalTo(oldName).once('value', s => {
                 const updates = {};
                 s.forEach(child => {
                     updates[`${child.key}/nama`] = newName;
-                    updates[`${child.key}/info_tambahan`] = newInfo;
+                    updates[`${child.key}/info_tambahan`] = info;
                 });
-                logsRef.update(updates).then(() => {
-                    alert("Data Berhasil Disimpan");
-                    closeModal();
-                });
+                logsRef.update(updates).then(() => { closeModal(); });
             });
         }
 
         function toggleBlock(perangkat, isBlocked) {
-            if (!perangkat || perangkat === "unknown") return alert("ID Tidak Valid");
-            const safeKey = btoa(perangkat).replace(/[=/+]/g, '');
-            if (isBlocked) {
-                if(confirm("Buka blokir?")) blockRef.child(safeKey).remove();
-            } else {
-                if(confirm("Blokir user ini?")) blockRef.child(safeKey).set(perangkat);
-            }
+            const key = btoa(perangkat).replace(/[=/+]/g, '');
+            if (isBlocked) { if(confirm("Buka blokir?")) blockRef.child(key).remove(); }
+            else { if(confirm("Blokir user?")) blockRef.child(key).set(perangkat); }
         }
 
         function hapusUser(nama) {
